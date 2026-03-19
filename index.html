@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0f">
+<title>Portfolio</title>
+<link rel="manifest" href="#" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: #1e1e28;
+    --text: #e8e8f0;
+    --muted: #5a5a72;
+    --green: #00e676;
+    --red: #ff3d57;
+    --yellow: #ffd600;
+    --accent: #6c63ff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overscroll-behavior: none;
+  }
+
+  /* HEADER */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn-add {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .btn-add:active { opacity: 0.7; }
+
+  .btn-refresh {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.15s;
+    line-height: 1;
+  }
+  .btn-refresh:active { color: var(--text); }
+  .btn-refresh.spinning { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* SUMMARY BAR */
+  .summary {
+    padding: 14px 20px;
+    display: flex;
+    gap: 20px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .summary::-webkit-scrollbar { display: none; }
+  .summary-item { white-space: nowrap; }
+  .summary-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 3px; }
+  .summary-value { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; }
+
+  /* LAST UPDATED */
+  .last-updated {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* LIST */
+  .list { padding: 8px 12px 100px; }
+
+  .section-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px 8px 6px;
+    font-weight: 600;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    padding: 13px 12px;
+    border-radius: 14px;
+    margin-bottom: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: background 0.1s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .item:active { background: var(--surface2); }
+
+  .item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    flex-shrink: 0;
+    margin-right: 12px;
+    letter-spacing: -0.5px;
+    font-family: 'DM Mono', monospace;
+    border: 1px solid var(--border);
+  }
+
+  .item-info { flex: 1; min-width: 0; }
+  .item-name {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+  .item-ticker {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .item-right { text-align: right; flex-shrink: 0; margin-left: 12px; }
+  .item-price {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    margin-bottom: 3px;
+  }
+  .item-change {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+  }
+  .item-change.up { color: var(--green); }
+  .item-change.down { color: var(--red); }
+  .item-change.flat { color: var(--muted); }
+
+  .item-del {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 60px;
+    background: var(--red);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border-radius: 0 14px 14px 0;
+    cursor: pointer;
+  }
+  .item.swipe-open .item-del { display: flex; }
+  .item.swipe-open .item-content { transform: translateX(-60px); }
+  .item-content { display: contents; transition: transform 0.2s; }
+
+  /* LOADING */
+  .item-loading .item-price,
+  .item-loading .item-change {
+    background: var(--surface2);
+    border-radius: 4px;
+    color: transparent;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* ERROR badge */
+  .badge-err {
+    font-size: 10px;
+    color: var(--yellow);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ADD MODAL */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    align-items: flex-end;
+  }
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%;
+    border-top: 1px solid var(--border);
+    animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .modal-hint { font-size: 12px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'DM Mono', monospace;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .field input::placeholder { color: var(--muted); }
+
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-cancel {
+    flex: 1;
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-save {
+    flex: 2;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .btn-save:active { opacity: 0.8; }
+
+  .quick-add { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .qa-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .qa-chip:hover, .qa-chip:active { border-color: var(--accent); color: var(--text); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Portfolio</h1>
+  <div class="header-actions">
+    <button class="btn-refresh" id="btnRefresh" onclick="refreshAll()" title="Aktualisieren">↻</button>
+    <button class="btn-add" onclick="openModal()">+ Hinzufügen</button>
+  </div>
+</div>
+
+<div class="summary" id="summary">
+  <div class="summary-item">
+    <div class="summary-label">Positionen</div>
+    <div class="summary-value" id="sumCount">—</div>
+  </div>
+  <div class="summary-item">
+    <div class="summary-label">Gewinner</div>
+    <div class="summary-value" style="color:var(--green)" id="sumUp">—</div>
+  </div>
+  <div class="summary-item">
+    <div class="summary-label">Verlierer</div>
+    <div class="summary-value" style="color:var(--red)" id="sumDown">—</div>
+  </div>
+  <div class="summary-item">
+    <div class="summary-label">Letzte Änderung</div>
+    <div class="summary-value" id="sumBest">—</div>
+  </div>
+</div>
+
+<div class="last-updated" id="lastUpdated">Noch nicht geladen</div>
+
+<div class="list" id="list"></div>
+
+<!-- ADD MODAL -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h2>Wertpapier hinzufügen</h2>
+    <p class="modal-hint">Yahoo Finance Ticker eingeben. Aktien: <code>NVDA</code>, <code>SAP.DE</code> · ETF: <code>XDWD.DE</code> · Krypto: <code>BTC-EUR</code></p>
+    
+    <div class="quick-add" id="quickAdd"></div>
+
+    <div class="field">
+      <label>Ticker Symbol</label>
+      <input type="text" id="inputTicker" placeholder="z.B. NVDA, BTC-EUR, XDWD.DE" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+    </div>
+    <div class="field">
+      <label>Anzeigename (optional)</label>
+      <input type="text" id="inputName" placeholder="z.B. NVIDIA" autocomplete="off" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
+      <button class="btn-save" onclick="addItem()">Hinzufügen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DEFAULT PORTFOLIO ───────────────────────────────────────────────────────
+const DEFAULT_ITEMS = [
+  // ETFs
+  { ticker: 'IWDA.AS',   name: 'Core MSCI World',          type: 'etf' },
+  { ticker: 'IEMA.AS',   name: 'MSCI EM USD (Acc)',        type: 'etf' },
+  { ticker: 'IUIT.L',    name: 'Automation & Robotics',    type: 'etf' },
+  // Aktien
+  { ticker: 'NVDA',      name: 'NVIDIA',                   type: 'stock' },
+  { ticker: 'SAP.DE',    name: 'SAP',                      type: 'stock' },
+  { ticker: 'PYPL',      name: 'PayPal',                   type: 'stock' },
+  { ticker: 'PLTR',      name: 'Palantir',                 type: 'stock' },
+  { ticker: 'MRVL',      name: 'Marvell Technology',       type: 'stock' },
+  { ticker: 'MUX.DE',    name: 'Mutares',                  type: 'stock' },
+  { ticker: 'NVO',       name: 'Novo-Nordisk',             type: 'stock' },
+  { ticker: 'BYDDF',     name: 'BYD',                      type: 'stock' },
+  { ticker: 'SHL.DE',    name: 'Siemens Healthineers',     type: 'stock' },
+  { ticker: 'KULR',      name: 'KULR Technology',          type: 'stock' },
+  { ticker: 'AII.TO',    name: 'Almonty Industries',       type: 'stock' },
+  // Krypto
+  { ticker: 'BTC-EUR',   name: 'Bitcoin',                  type: 'crypto' },
+  { ticker: 'ETH-EUR',   name: 'Ethereum',                 type: 'crypto' },
+  { ticker: 'SOL-EUR',   name: 'Solana',                   type: 'crypto' },
+  { ticker: 'KAS-EUR',   name: 'Kaspa',                    type: 'crypto' },
+];
+
+const QUICK_SUGGESTIONS = [
+  { ticker: 'AAPL',    name: 'Apple' },
+  { ticker: 'MSFT',    name: 'Microsoft' },
+  { ticker: 'AMZN',   name: 'Amazon' },
+  { ticker: 'XDWD.DE', name: 'MSCI World DE' },
+  { ticker: 'GC=F',   name: 'Gold' },
+  { ticker: 'CL=F',   name: 'Öl (WTI)' },
+  { ticker: 'XRP-EUR', name: 'XRP' },
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let items = [];
+let priceData = {};
+
+function loadStorage() {
+  try {
+    const saved = localStorage.getItem('portfolio_items');
+    if (saved) items = JSON.parse(saved);
+    else items = [...DEFAULT_ITEMS];
+  } catch(e) { items = [...DEFAULT_ITEMS]; }
+}
+
+function saveStorage() {
+  try { localStorage.setItem('portfolio_items', JSON.stringify(items)); } catch(e) {}
+}
+
+// ─── PROXY / FETCH ───────────────────────────────────────────────────────────
+async function fetchPrice(ticker) {
+  // Use allorigins proxy to bypass CORS
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=2d`;
+  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  
+  try {
+    const res = await fetch(proxy, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const outer = await res.json();
+    const data = JSON.parse(outer.contents);
+    const result = data?.chart?.result?.[0];
+    if (!result) throw new Error('No data');
+    
+    const meta = result.meta;
+    const price = meta.regularMarketPrice;
+    const prevClose = meta.chartPreviousClose || meta.previousClose;
+    const currency = meta.currency || 'USD';
+    const change = prevClose ? ((price - prevClose) / prevClose * 100) : 0;
+    
+    return { price, change, currency, ok: true };
+  } catch(e) {
+    // Fallback: try v7 endpoint
+    try {
+      const url2 = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(ticker)}`;
+      const proxy2 = `https://api.allorigins.win/get?url=${encodeURIComponent(url2)}`;
+      const res2 = await fetch(proxy2, { signal: AbortSignal.timeout(10000) });
+      const outer2 = await res2.json();
+      const data2 = JSON.parse(outer2.contents);
+      const q = data2?.quoteResponse?.result?.[0];
+      if (!q) throw new Error('No quote');
+      return {
+        price: q.regularMarketPrice,
+        change: q.regularMarketChangePercent,
+        currency: q.currency || 'USD',
+        ok: true
+      };
+    } catch(e2) {
+      return { ok: false, error: e2.message };
+    }
+  }
+}
+
+// ─── EUR CONVERSION ──────────────────────────────────────────────────────────
+let eurRates = {};
+
+async function fetchEurRate(currency) {
+  if (currency === 'EUR' || currency === 'GBp') return 1;
+  const key = currency + 'EUR=X';
+  if (eurRates[key] !== undefined) return eurRates[key];
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${key}?interval=1d&range=1d`;
+    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+    const outer = await res.json();
+    const data = JSON.parse(outer.contents);
+    const rate = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    eurRates[key] = rate || 1;
+    return eurRates[key];
+  } catch(e) {
+    return 1;
+  }
+}
+
+function formatEur(val) {
+  if (val === null || val === undefined || isNaN(val)) return '—';
+  if (val >= 1000) return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  if (val >= 1) return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  return val.toLocaleString('de-DE', { minimumFractionDigits: 4, maximumFractionDigits: 6 }) + ' €';
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+const TYPE_ORDER = ['etf', 'stock', 'crypto'];
+const TYPE_LABELS = { etf: 'ETFs', stock: 'Aktien', crypto: 'Krypto' };
+const ICONS = {
+  'NVDA': 'NV', 'SAP.DE': 'SAP', 'PYPL': 'PP', 'PLTR': 'PLT',
+  'MRVL': 'MRL', 'MUX.DE': 'MUT', 'NVO': 'NVO', 'BYDDF': 'BYD',
+  'SHL.DE': 'SHL', 'KULR': 'KLR', 'AII.TO': 'ALM',
+  'IWDA.AS': 'W', 'IEMA.AS': 'EM', 'IUIT.L': 'ROB',
+  'BTC-EUR': '₿', 'ETH-EUR': 'Ξ', 'SOL-EUR': '◎', 'KAS-EUR': 'K',
+};
+const ICON_COLORS = {
+  etf: '#6c63ff', stock: '#00b4d8', crypto: '#f7931a',
+};
+
+function getIcon(item) {
+  return ICONS[item.ticker] || item.ticker.substring(0, 2).toUpperCase();
+}
+
+function renderList() {
+  const list = document.getElementById('list');
+  if (items.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📊</div><p>Noch keine Wertpapiere.<br>Tippe "+ Hinzufügen" um loszulegen.</p></div>`;
+    updateSummary();
+    return;
+  }
+
+  const groups = {};
+  for (const type of TYPE_ORDER) {
+    groups[type] = items.filter(i => i.type === type);
+  }
+
+  let html = '';
+  for (const type of TYPE_ORDER) {
+    const group = groups[type];
+    if (!group.length) continue;
+    html += `<div class="section-label">${TYPE_LABELS[type]}</div>`;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type !== type) continue;
+      const pd = priceData[item.ticker];
+      const isLoading = !pd;
+      const isError = pd && !pd.ok;
+
+      let priceStr = '— €';
+      let changeHtml = '<span class="item-change flat">—</span>';
+
+      if (pd && pd.ok) {
+        priceStr = formatEur(pd.priceEur);
+        const ch = pd.change;
+        const cls = ch > 0 ? 'up' : ch < 0 ? 'down' : 'flat';
+        const arrow = ch > 0 ? '▲' : ch < 0 ? '▼' : '—';
+        changeHtml = `<span class="item-change ${cls}">${arrow} ${Math.abs(ch).toFixed(2)} %</span>`;
+      } else if (isError) {
+        changeHtml = `<span class="badge-err">⚠ Fehler</span>`;
+      }
+
+      const iconColor = ICON_COLORS[type] || '#6c63ff';
+      html += `
+        <div class="item ${isLoading ? 'item-loading' : ''}" id="item-${i}" onclick="handleItemClick(${i}, event)">
+          <div class="item-icon" style="color:${iconColor}">${getIcon(item)}</div>
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-ticker">${item.ticker}</div>
+          </div>
+          <div class="item-right">
+            <div class="item-price">${priceStr}</div>
+            ${changeHtml}
+          </div>
+          <div class="item-del" onclick="deleteItem(${i}, event)">🗑</div>
+        </div>`;
+    }
+  }
+
+  list.innerHTML = html;
+  updateSummary();
+}
+
+function updateSummary() {
+  const loaded = Object.values(priceData).filter(p => p && p.ok);
+  document.getElementById('sumCount').textContent = items.length;
+  document.getElementById('sumUp').textContent = loaded.filter(p => p.change > 0).length;
+  document.getElementById('sumDown').textContent = loaded.filter(p => p.change < 0).length;
+  
+  if (loaded.length > 0) {
+    const best = loaded.reduce((a, b) => Math.abs(b.change) > Math.abs(a.change) ? b : a);
+    const bestItem = items.find(i => priceData[i.ticker] === best);
+    if (bestItem) {
+      const ch = best.change;
+      const col = ch > 0 ? 'var(--green)' : 'var(--red)';
+      document.getElementById('sumBest').innerHTML = `<span style="color:${col}">${bestItem.name.split(' ')[0]}</span>`;
+    }
+  }
+}
+
+// ─── REFRESH ─────────────────────────────────────────────────────────────────
+async function refreshAll() {
+  const btn = document.getElementById('btnRefresh');
+  btn.classList.add('spinning');
+  
+  // Render loading state
+  renderList();
+
+  const promises = items.map(async (item) => {
+    const pd = await fetchPrice(item.ticker);
+    if (pd.ok) {
+      // Convert to EUR
+      let rate = 1;
+      if (pd.currency && pd.currency !== 'EUR') {
+        if (pd.currency === 'GBp') {
+          rate = await fetchEurRate('GBP');
+          pd.priceEur = pd.price / 100 * rate;
+        } else {
+          rate = await fetchEurRate(pd.currency);
+          pd.priceEur = pd.price * rate;
+        }
+      } else {
+        pd.priceEur = pd.price;
+      }
+    }
+    priceData[item.ticker] = pd;
+    renderList(); // Progressive update
+  });
+
+  await Promise.allSettled(promises);
+  
+  btn.classList.remove('spinning');
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent = 
+    `Zuletzt aktualisiert: ${now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+}
+
+// ─── ITEM ACTIONS ────────────────────────────────────────────────────────────
+let swipeOpenIndex = null;
+
+function handleItemClick(idx, e) {
+  if (swipeOpenIndex === idx) {
+    // Close
+    document.getElementById('item-' + idx)?.classList.remove('swipe-open');
+    swipeOpenIndex = null;
+  } else {
+    if (swipeOpenIndex !== null) {
+      document.getElementById('item-' + swipeOpenIndex)?.classList.remove('swipe-open');
+    }
+    document.getElementById('item-' + idx)?.classList.add('swipe-open');
+    swipeOpenIndex = idx;
+  }
+}
+
+function deleteItem(idx, e) {
+  e.stopPropagation();
+  items.splice(idx, 1);
+  saveStorage();
+  swipeOpenIndex = null;
+  renderList();
+}
+
+// ─── ADD MODAL ────────────────────────────────────────────────────────────────
+function openModal() {
+  // Build quick add suggestions (exclude already added)
+  const existingTickers = items.map(i => i.ticker);
+  const suggestions = QUICK_SUGGESTIONS.filter(s => !existingTickers.includes(s.ticker));
+  const qa = document.getElementById('quickAdd');
+  qa.innerHTML = suggestions.map(s => 
+    `<div class="qa-chip" onclick="quickAdd('${s.ticker}','${s.name}')">${s.name}</div>`
+  ).join('');
+  
+  document.getElementById('modalBackdrop').classList.add('open');
+  setTimeout(() => document.getElementById('inputTicker').focus(), 300);
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.getElementById('inputTicker').value = '';
+  document.getElementById('inputName').value = '';
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalBackdrop')) closeModal();
+}
+
+function quickAdd(ticker, name) {
+  document.getElementById('inputTicker').value = ticker;
+  document.getElementById('inputName').value = name;
+}
+
+async function addItem() {
+  const ticker = document.getElementById('inputTicker').value.trim().toUpperCase();
+  let name = document.getElementById('inputName').value.trim();
+  
+  if (!ticker) { alert('Ticker eingeben!'); return; }
+  if (items.find(i => i.ticker === ticker)) { alert('Bereits vorhanden.'); return; }
+  if (!name) name = ticker;
+
+  // Detect type
+  const cryptoSuffix = ticker.endsWith('-EUR') || ticker.endsWith('-USD') || ticker.endsWith('-BTC');
+  const etfKeywords = ['IWDA', 'IEMA', 'XDWD', 'VWRL', 'CSPX', 'IUIT', 'MSCI', 'ETF'];
+  let type = 'stock';
+  if (cryptoSuffix) type = 'crypto';
+  else if (etfKeywords.some(k => ticker.includes(k))) type = 'etf';
+
+  items.push({ ticker, name, type });
+  saveStorage();
+  closeModal();
+  renderList();
+
+  // Fetch price for new item
+  const pd = await fetchPrice(ticker);
+  if (pd.ok) {
+    let rate = 1;
+    if (pd.currency && pd.currency !== 'EUR') {
+      if (pd.currency === 'GBp') {
+        rate = await fetchEurRate('GBP');
+        pd.priceEur = pd.price / 100 * rate;
+      } else {
+        rate = await fetchEurRate(pd.currency);
+        pd.priceEur = pd.price * rate;
+      }
+    } else {
+      pd.priceEur = pd.price;
+    }
+  }
+  priceData[ticker] = pd;
+  renderList();
+}
+
+// Enter key in modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('modalBackdrop').classList.contains('open')) {
+    addItem();
+  }
+  if (e.key === 'Escape') closeModal();
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadStorage();
+renderList();
+refreshAll();
+
+// Auto-refresh every 5 min
+setInterval(refreshAll, 5 * 60 * 1000);
+</script>
+</body>
+</html>
